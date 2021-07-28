@@ -26,6 +26,7 @@ module UnitTests
     def load
       load_environment
 
+      add_active_storage_migration
       add_action_text_migration if bundle.includes?('actiontext')
 
       run_migrations
@@ -174,6 +175,12 @@ end
       end
     end
 
+    def add_active_storage_migration
+      fs.within_project do
+        run_command! 'bundle exec rake active_storage:install:migrations'
+      end
+    end
+
     def add_initializer_for_time_zone_aware_types
       path = 'config/initializers/configure_time_zone_aware_types.rb'
       fs.write(path, <<-TEXT)
@@ -189,7 +196,8 @@ end
 
     def run_migrations
       fs.within_project do
-        run_command! 'bundle exec rake db:drop:all db:create:all db:migrate'
+        run_command! 'bundle exec rake db:drop:all db:create:all'
+        run_command! 'bundle exec rake db:migrate'
       end
     end
 
